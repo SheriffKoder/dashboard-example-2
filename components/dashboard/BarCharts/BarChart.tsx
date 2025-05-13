@@ -243,8 +243,12 @@ const BarChart: React.FC<BarChartProps> = ({
         },
         indexAxis,
         animation: animation ? undefined : false,
-        barPercentage,
-        categoryPercentage,
+        datasets: {
+          bar: {
+            barPercentage,
+            categoryPercentage,
+          }
+        },
       },
     });
 

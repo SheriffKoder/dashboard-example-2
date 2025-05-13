@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import { LineChart } from './LineChart';
 
-function generateRandomData(count, min, max) {
+function generateRandomData(count: number, min: number, max: number) {
   const middleRange = (max - min) / 2 + min;
   const variance = (max - min) / 4;
   
@@ -31,7 +31,7 @@ function generateRandomData(count, min, max) {
   });
 }
 
-function generateDateLabels(count, startDate = new Date()) {
+function generateDateLabels(count: number, startDate = new Date()) {
   const labels = [];
   const date = new Date(startDate);
   

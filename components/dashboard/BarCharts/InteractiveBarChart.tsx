@@ -88,7 +88,7 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
 
     // Create a deep copy of the data to avoid mutating props
     const chartData = {
-      labels: [...data.labels],
+      labels: Array.isArray(data.labels) ? [...data.labels] : [],
       datasets: data.datasets.map(dataset => ({
         ...dataset,
         backgroundColor: initialSplitIndex >= 0 ? initialBackgroundColors : Array(dataset.data.length).fill(activeColor),
@@ -165,8 +165,12 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
         },
         indexAxis,
         animation: animation ? undefined : false,
-        barPercentage,
-        categoryPercentage,
+        datasets: {
+          bar: {
+            barPercentage,
+            categoryPercentage,
+          }
+        },
         // Only add onHover if interactiveHover is true
         onHover: interactiveHover ? (event: ChartEvent, elements: any[], chart: Chart) => {
           if (!event.native) return;
@@ -189,8 +193,8 @@ const InteractiveBarChart: React.FC<InteractiveBarChartProps> = ({
                 i <= barIndex ? activeBorderColor : inactiveBorderColorValue
               );
               
-              chart.data.datasets[0].backgroundColor = newBackgroundColors;
-              chart.data.datasets[0].borderColor = newBorderColors;
+              chart.data.datasets[0].backgroundColor = newBackgroundColors as any;
+              chart.data.datasets[0].borderColor = newBorderColors as any;
               chart.update('none'); // Use 'none' mode to skip animations
             }
           }
