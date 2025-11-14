@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import { LineChart } from './LineChart';
-import { ScoreType, TimePeriod } from '@/constants/types';
 
 function generateRandomData(count: number, min: number, max: number) {
   const middleRange = (max - min) / 2 + min;
@@ -50,79 +49,10 @@ function generateDateLabels(count: number, startDate = new Date()) {
 }
 
 
-interface ChartContainerProps {
-  selectedDataset: ScoreType;
-  selectedTimePeriod: TimePeriod;
-  isToggleSelected?: boolean;
-  lineChartData: {
-    totalBalance: Record<TimePeriod, {
-      labels: string[];
-      datasets: Array<{
-        label: string;
-        data: number[];
-      }>;
-    }>;
-    price: Record<TimePeriod, {
-      labels: string[];
-      datasets: Array<{
-        label: string;
-        data: number[];
-      }>;
-    }>;
-  };
-}
+const testData = generateRandomData(100, 10, 20);
+const testLabels = generateDateLabels(50);
 
-const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected = false, lineChartData }: ChartContainerProps) => {
-  // Calculate min/max from the "ALL" period data for each dataset type
-  // This will change based on the active tab
-  const totalBalanceData = lineChartData.totalBalance.ALL.datasets[0].data;
-  const priceData = lineChartData.price.ALL.datasets[0].data;
-  
-  const totalBalanceMin = Math.min(...totalBalanceData);
-  const totalBalanceMax = Math.max(...totalBalanceData);
-  const priceMin = Math.min(...priceData);
-  const priceMax = Math.max(...priceData);
-
-  // Test data for totalBalance - generate 100 items with tab-specific values
-  const testDataTotalBalance = generateRandomData(100, totalBalanceMin, totalBalanceMax);
-
-  // Test data for price - generate 100 items with tab-specific values
-  const testDataPrice = generateRandomData(100, priceMin, priceMax);
-
-  // Select base data based on selectedDataset
-  const baseData = selectedDataset === 'price' ? testDataPrice : testDataTotalBalance;
-  
-  // Calculate slice based on time period
-  const dataLength = baseData.length; // 100
-  const sliceSize = Math.floor(dataLength / 3); // 33
-  
-  let slicedData: number[];
-  
-  switch (selectedTimePeriod) {
-    case 'IW':
-      // First third
-      slicedData = baseData.slice(0, sliceSize);
-      break;
-    case 'IM':
-      // Middle third
-      slicedData = baseData.slice(sliceSize, sliceSize * 2);
-      break;
-    case 'YV':
-      // Last third (includes remainder)
-      slicedData = baseData.slice(sliceSize * 2);
-      break;
-    case 'ALL':
-      // All data
-      slicedData = baseData;
-      break;
-    default:
-      slicedData = baseData;
-  }
-  
-  // Generate labels to match the data length
-  const testLabels = generateDateLabels(slicedData.length);
-
-  const data: any[] = [
+const data: any[] = [
     {
       company: "Company 3",
       location: {
@@ -137,15 +67,13 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
         labels: testLabels,
         datasets: [
           {
-            label: selectedDataset === 'price' ? 'Price' : 'Total Balance',
-            data: slicedData,
+            label: 'Revenue',
+            data: testData,
             profit: 2000,
           },
           {
-            label: selectedDataset === 'price' ? 'Price Trend' : 'Profit',
-            data: selectedDataset === 'price' 
-              ? slicedData.slice(0, 50) // 20% of sliced data
-              : slicedData.slice(0, 50), // 30% of sliced data
+            label: 'Profit',
+            data: testData.slice(0, 30),
             profit: 3000,
           },
         ]
@@ -153,16 +81,13 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
     },
   ];
 
+const ChartContainer = () => {
+
+    const [selectedCompany, setSelectedCompany] = useState(data[0]);
     const [primaryColor, setPrimaryColor] = useState<string>("#000000");
     const [secondaryColor, setSecondaryColor] = useState<string>("#000000");
     const [tertiaryColor, setTertiaryColor] = useState<string>("#000000");
     const [boxesPerLine, setBoxesPerLine] = useState(70);
-    
-    // Responsive grid size
-    const responsiveBoxesPerLine = typeof window !== 'undefined' && window.innerWidth < 768 ? 30 : 70;
-
-    // Use the data directly - it updates when selectedDataset changes
-    const selectedCompany = data[0];
   
     // Function to update colors from CSS variables
     const updateColors = () => {
@@ -172,8 +97,7 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
     //     .getPropertyValue('--color-secondary').trim();
     //   const colorTertiary = getComputedStyle(document.documentElement)
     //     .getPropertyValue('--color-tertiary').trim();
-      // If toggle is selected, make first line white (full opacity), otherwise grey (with opacity)
-      const colorPrimary = isToggleSelected ? "#ffffff" : "#ffffff36";
+      const colorPrimary = "#ffffff36";
       const colorSecondary = "#ffffff";
       const colorTertiary = "#8b5cf6";
       if (colorPrimary) setPrimaryColor(colorPrimary);
@@ -186,11 +110,7 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
       updateColors();
     }, []);
   
-    // Listen for theme changes and toggle state
-    useEffect(() => {
-      updateColors();
-    }, [isToggleSelected]);
-
+    // Listen for theme changes
     useEffect(() => {
       // Create a MutationObserver to watch for changes to the document's class or style
       const observer = new MutationObserver(updateColors);
@@ -205,17 +125,17 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
       return () => observer.disconnect();
     }, []);
   return (
-        <div className='relative h-[200px] md:h-[250px] w-full px-4 py-4 md:px-[2rem] md:py-[2rem] overflow-hidden'>
+        <div className='relative h-[250px] w-full px-[2rem] py-[2rem] overflow-hidden'>
 
           {/* Grid and gradient mask overlay */}
           <div className='absolute top-0 left-0 w-full h-full z-[-1]'>
             <div className='w-full h-full grid' 
                  style={{ 
-                   gridTemplateColumns: `repeat(${responsiveBoxesPerLine}, 1fr)`,
-                   gridTemplateRows: `repeat(${responsiveBoxesPerLine}, 1fr)`,
+                   gridTemplateColumns: `repeat(${boxesPerLine}, 1fr)`,
+                   gridTemplateRows: `repeat(${boxesPerLine}, 1fr)`,
                    gap: '0px',
                  }}>
-              {Array.from({ length: responsiveBoxesPerLine * responsiveBoxesPerLine }, (_, i) => (
+              {Array.from({ length: boxesPerLine * boxesPerLine }, (_, i) => (
                 <div key={i} className='border-r border-b aspect-square border-[rgba(255,255,255,0.015)]'></div>
               ))}
             </div>
@@ -246,21 +166,23 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
           </div>
               
           {/* Chart, x-axis and y-axis */}
-          <div className='flex flex-row h-full w-full gap-2 md:gap-[1rem]'>
+          <div className='flex flex-row h-full w-full gap-[1rem]'>
 
               {/* prices */}
-              <div className='hidden sm:flex flex-col h-[80%] justify-between'>
+              <div className='flex flex-col h-[80%] justify-between'>
                 {["$60", "$70", "$80", "$90", "$100"].map((price, index)=>(
                   <div key={index} className=''>
-                    <p className='text-[8px] md:text-[10px] text-white/20'>{price}</p>
+                    <p className='text-[10px] text-white/20'>{price}</p>
                   </div>
-                ))}
+                ))
+
+                }
               </div>
 
               {/* chart and labels*/}
-              <div className='flex flex-col gap-2 md:gap-[1rem] w-full'>
+              <div className='flex flex-col gap-[1rem] w-full'>
                 {/* Chart */}
-                <div className='h-[100px] sm:h-[120px] md:h-[140px] relative'>
+                <div className='h-[140px] relative'>
                 <LineChart
                         height={"100%"}
                         showNeonShadow={false}
@@ -329,14 +251,14 @@ const ChartContainer = ({ selectedDataset, selectedTimePeriod, isToggleSelected 
                   <div 
                     className="border-l-[2px] border-white/10 border-dashed h-[100%] absolute top-0 w-1"
                     style={{ 
-                      left: `${(data[0].datasets.datasets[1].data.length / data[0].datasets.datasets[0].data.length) * 100 +data[0].datasets.datasets[1].data.length - (selectedTimePeriod === "ALL" ? isToggleSelected ? 110 : 50 : 0)}%` 
+                      left: `${(data[0].datasets.datasets[1].data.length / data[0].datasets.datasets[0].data.length) * 100 +data[0].datasets.datasets[1].data.length - 0.5}%` 
                     }}
                   ></div>
                 </div>
-                <div className='flex flex-row gap-1 md:gap-[1rem] justify-between h-[20px] md:h-[30px] overflow-x-auto'>
+                <div className='flex flex-row gap-[1rem] justify-between h-[30px]'>
                   {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((label, index)=>(
-                    <div key={index} className='flex-shrink-0'>
-                      <p className='text-[8px] md:text-[10px] text-white/20'>{label}</p>
+                    <div key={index} className=''>
+                      <p className='text-[10px] text-white/20'>{label}</p>
                     </div>
                   ))}
                 </div>

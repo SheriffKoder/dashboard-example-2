@@ -1,40 +1,50 @@
 'use client'
 
-import { ArrowUpDown, Grid2X2, Pyramid } from 'lucide-react'
-import React, { useState } from 'react'
+import { ArrowUpDown, Grid2X2, Pyramid, Coins, Zap, Box, Package, TrendingUp, FileText } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
 
-const SwapContainer = () => {
+// Helper function to get icon component from icon name
+const getIconComponent = (iconName: string | null, className: string = 'w-4 h-4 stroke-2 opacity-50') => {
+  const iconMap: Record<string, React.ReactNode> = {
+    'Grid2X2': <Grid2X2 className={`${className} rotate-45`} />,
+    'Pyramid': <Pyramid className={className} />,
+    'Coins': <Coins className={className} />,
+    'Zap': <Zap className={className} />,
+    'Box': <Box className={className} />,
+    'Package': <Package className={className} />,
+    'TrendingUp': <TrendingUp className={className} />,
+    'FileText': <FileText className={className} />,
+  };
+  
+  if (!iconName) return null;
+  return iconMap[iconName] || null;
+};
 
-    const swapItems = [
-        {
-            icon: <Grid2X2 className='w-4 h-4 stroke-2 rotate-45 opacity-50'/>,
-            leftSide: {
-                firstRow: 'BMEI',
-                secondRow: 'Binance',
-                thirdRow: 'Balance 0.004',
-            },
-            rightSide: {
-                firstRow: 'Pay',
-                secondRow: '0.00256',
-                thirdRow: '$480.44',
-                thirdRow_ext: null,
-            }
-        },
-        {
-            icon: <Pyramid className='w-4 h-4 stroke-2 opacity-50'/>,
-            leftSide: {
-                firstRow: 'ETH',
-                secondRow: 'Ethereum',
-                thirdRow: 'Balance 0',
-            },
-            rightSide: {
-                firstRow: 'Receive',
-                secondRow: '32.45679',
-                thirdRow: '$800.25',
-                thirdRow_ext: "+40%"
-            }
-        }
-    ]
+interface SwapContainerProps {
+  swapData: Array<{
+    icon: string | null;
+    leftSide: {
+      firstRow: string;
+      secondRow: string;
+      thirdRow: string;
+    };
+    rightSide: {
+      firstRow: string;
+      secondRow: string;
+      thirdRow: string;
+      thirdRow_ext: string | null;
+    };
+  }>;
+}
+
+const SwapContainer = ({ swapData }: SwapContainerProps) => {
+  // Map icons from data
+  const swapItems = useMemo(() => {
+    return swapData.map((item) => ({
+      ...item,
+      icon: getIconComponent(item.icon)
+    }));
+  }, [swapData]);
 
     const [swapItemsOrder, setSwapItemsOrder] = useState([0, 1]);
 
@@ -129,7 +139,7 @@ const SwapContainer = () => {
 
                 </div> 
 
-                <button className='w-full bg-foreground/10 rounded-md py-2 mt-auto
+                <button className='w-full bg-foreground/10 rounded-md py-2 mt-4 lg:mt-auto
                 hover:bg-foreground/15 transition-all duration-300 cursor-pointer'
                 onClick={handleSwap}
                 >Swap</button>

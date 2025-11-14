@@ -4,25 +4,34 @@ import React, { useEffect, useState } from 'react'
 import BarChart from './BarChart';
 import InteractiveBarChart from './InteractiveBarChart';
 
-const BarChartContainer = ({
-    title,
-    value,
-    subTitle,
-    subTitleExt,
-    componentColor,
-    initialSplitIndex
-}: {
+interface BarChartContainerProps {
     title: string;
     value: string;
     subTitle: string;
     subTitleExt?: string;
     componentColor?: string;
     initialSplitIndex?: number;
-}) => {
+    chartData?: {
+        labels: string[];
+        datasets: Array<{
+            label: string;
+            data: number[];
+        }>;
+    };
+}
 
+const BarChartContainer = ({
+    title,
+    value,
+    subTitle,
+    subTitleExt,
+    componentColor,
+    initialSplitIndex,
+    chartData
+}: BarChartContainerProps) => {
 
-// Sample data array
-const data = {
+// Use provided chartData or fallback to default
+const data = chartData || {
   labels: [
     "Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7", "Jan 8", 
     "Jan 9", "Jan 10", "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15", 
@@ -52,44 +61,8 @@ const greenHighlightIndexes = data.datasets[0].data
   .filter(item => item.value <= 30) // Highlight values under 30 in green
   .map(item => item.index);
 
-const volumeData = {
-  labels: [
-    "Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7", "Jan 8", 
-    "Jan 9", "Jan 10", "Jan 11", "Jan 12", "Jan 13", "Jan 14", "Jan 15", 
-    "Jan 16", "Jan 17", "Jan 18", "Jan 19", "Jan 20", "Jan 21", "Jan 22", 
-    "Jan 23", "Jan 24", "Jan 25", "Jan 26", "Jan 27", "Jan 28", "Jan 29", "Jan 30"
-  ],
-  datasets: [
-    {
-      label: "Trading Volume",
-      data: [
-        42, 78, 35, 40, 65, 55, 25, 30, 45, 52, 
-        60, 48, 80, 95, 110, 75, 65, 90, 120, 135, 
-        85, 30, 25, 20, 15, 22, 18, 25, 30, 28
-      ],
-
-      // backgroundColor: Array(30).fill('').map((_, i) => {
-      //   // Red highlights
-      //   if (redHighlightIndexes.includes(i)) return 'rgba(255, 99, 132, 0.8)';
-        
-      //   // Green highlights
-      //   if (greenHighlightIndexes.includes(i)) return 'rgba(75, 192, 192, 0.8)';
-        
-      //   // Regular coloring scheme
-      //   if (i < 22) return 'rgba(123, 104, 238, 0.8)';  // Purple for first 22 (except highlighted)
-      //   return 'rgba(255, 255, 255, 0.1)';              // Gray for last 8
-      // }),
-      // borderColor: [
-      //   // First 22 bars with purple/blue border
-      //   // ...Array(22).fill('rgba(123, 104, 238, 0.8)'),
-      //   // Last 8 bars with gray border
-      //   // ...Array(8).fill('rgba(255, 255, 255, 0.1)')
-      // ],
-      borderWidth: 0,
-      borderRadius: 0,
-    }
-  ]
-};
+// Use the provided chartData
+const volumeData = data;
 
 
 const [primaryColor, setPrimaryColor] = useState<string>("#000000");

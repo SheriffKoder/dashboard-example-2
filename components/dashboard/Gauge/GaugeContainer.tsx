@@ -2,11 +2,20 @@
 import React, { useEffect, useState } from 'react'
 import GreedIndexChart from './GreedIndexChart';
 
+interface GaugeContainerProps {
+  gaugeData: {
+    value: number;
+    changePercent: number;
+    titles: string[];
+    percentages: number[];
+    colors: string[];
+    activeColors: string[];
+  };
+}
+
 const GaugeContainer = ({
-  value,
-}: {
-  value: number;
-}) => {
+  gaugeData,
+}: GaugeContainerProps) => {
 
 
 
@@ -54,12 +63,8 @@ const [selectedSegment, setSelectedSegment] = useState<number>(0);
     return () => observer.disconnect();
     }, []);
 
-  const data = {
-    titles: ["Level 1", "Level 2", "Level 3", "Level 4"],
-    percentages: [15, 40, 70, 100],
-    colors: ["#8771f4", "#64afe0", "#2eb5b9", "rgba(255, 255, 255, 0.05)"],
-    activeColors: ["#8771f4", "#64afe0", "#2eb5b9", "rgba(255, 255, 255, 0.05)"],
-  }
+  // Use data from props
+  const data = gaugeData;
   return (
     <div className=' py-[1.5rem] relative text-foreground flex items-center justify-center h-full'>
 
@@ -74,8 +79,10 @@ const [selectedSegment, setSelectedSegment] = useState<number>(0);
           <div className='absolute bottom-0 left-1/2 translate-x-[-50%] 
             w-[170px] h-[100px] flex items-center justify-center flex-col'>
               <span className='text-xs opacity-50'>{data.titles[selectedSegment]}</span>
-              <span className='text-2xl mb-2 mt-[-2px] font-medium'>{value}%</span>
-              <span className='text-xs text-tertiary'>+8.3%</span>
+              <span className='text-2xl mb-2 mt-[-2px] font-medium'>{gaugeData.value}%</span>
+              <span className={`text-xs ${gaugeData.changePercent >= 0 ? 'text-tertiary' : 'text-red-500'}`}>
+                {gaugeData.changePercent >= 0 ? '+' : ''}{gaugeData.changePercent.toFixed(1)}%
+              </span>
           </div>
 
 
@@ -90,7 +97,7 @@ const [selectedSegment, setSelectedSegment] = useState<number>(0);
             gapDegrees={2}
             size={400}
             className={''}
-            needleValue={value}
+            needleValue={gaugeData.value}
             showNeedle={false}
             rotation={270}
             arcSpan={180}
@@ -191,7 +198,7 @@ const [selectedSegment, setSelectedSegment] = useState<number>(0);
             
             // indicator
             showIndicator={true}
-            indicatorValue={value}
+            indicatorValue={gaugeData.value}
             indicatorColor={"#ffffff"}
             indicatorBaseWidth={8}
             indicatorLength={7}
